@@ -36,8 +36,8 @@ public partial class Game : Node {
   [ExportGroup("Audio")]
   [Export] AudioStreamPlayer Music, PlayerSound, OtherSound;
   [Export] AudioStream IntroMusic;
-  [Export] AudioStream PickupSound, WaterSplash;
-  [Export] AudioStream[] WaterSteps;
+  [Export] AudioStream PickupSound, WaterSplash, DeathSound;
+  [Export] AudioStream[] WaterSteps, Fists, Kicks, Grunts;
 
   ShaderMaterial PowerBarMaterial;
   public readonly List<Enemy> enemies = new();
@@ -63,6 +63,8 @@ public partial class Game : Node {
   }
 
 
+  AnimationNodeStateMachinePlayback sm;
+
   public override void _Ready() {
     var a = animPlayer.GetAnimation("Idle");
     a.LoopMode = Animation.LoopModeEnum.Pingpong;
@@ -72,8 +74,17 @@ public partial class Game : Node {
     a.LoopMode = Animation.LoopModeEnum.Linear;
     a = animPlayer.GetAnimation("Climb");
     a.LoopMode = Animation.LoopModeEnum.Linear;
+    a = animPlayer.GetAnimation("Hit1");
+    a.LoopMode = Animation.LoopModeEnum.None;
+    a = animPlayer.GetAnimation("Hit2");
+    a.LoopMode = Animation.LoopModeEnum.None;
 
     usedWeapon = ItemNone;
+    GetTree().CreateTimer(.25).Timeout += Startup;
+  }
+
+  [Export] TextureRect DebugLogo;
+  void Startup() {
     Katana.Visible = false;
     Nunchaku1.Visible = false;
     Nunchaku2.Visible = false;
@@ -84,11 +95,6 @@ public partial class Game : Node {
       Items[i].Visible = false;
     }
 
-    GetTree().CreateTimer(.25).Timeout += Startup;
-  }
-
-  [Export] TextureRect DebugLogo;
-  void Startup() {
     // FIXME Music.Play();
     DebugLogo.Visible = false;
     currentRoom = room.BuildRoom(World.GardenSouth, 0);
@@ -97,12 +103,16 @@ public partial class Game : Node {
     Health = 100;
     PowerBarMaterial = PowerBarNinja.Material as ShaderMaterial;
     PowerBarMaterial.SetShaderParameter("Value", Health * .01f);
+
+
+    sm = animTree.Get("parameters/Anims/playback").As<AnimationNodeStateMachinePlayback>();
   }
 
   public override void _UnhandledKeyInput(InputEvent @event) {
     if (@event is not InputEventKey k) return;
     if (k.Keycode == Key.Q && k.Pressed) { currentRoom = room.BuildRoom(World.GardenNorthPoolWall, 0); currentEnemy = null; }
-      if (k.Keycode == Key.Escape && k.Pressed) GetTree().Quit();
+    if (k.Keycode == Key.Z && k.Pressed) HitPlayer(26);
+    if (k.Keycode == Key.Escape && k.Pressed) GetTree().Quit();
   }
 
 
@@ -112,11 +122,18 @@ public partial class Game : Node {
 
     int an = (int)a;
     if (s == status && anim == (int)a) return;
-    
+
+    if (a != Anim.Run) animTree.Set("parameters/TimeScale/scale", 1); // reset the timescale in case it is not the run animation
+
     status = s;
     anim = an;
   }
   public void SetIdleStatus() {
+
+    if (status == PlayerStatus.Death) {
+      return;
+    }
+
     status = PlayerStatus.Idle;
     anim = (int)Anim.Idle;
     animTree.Set("parameters/TimeScale/scale", 1);
@@ -130,6 +147,8 @@ public partial class Game : Node {
   }
 
   public override void _Process(double delta) {
+    Dbg.Text = $"{anim} {status} {hitDelay:f} {sm?.GetCurrentNode()}";
+
     if (Engine.IsEditorHint() || status == PlayerStatus.NONE) return;
     float d = (float)delta;
 
@@ -145,6 +164,16 @@ public partial class Game : Node {
     }
 
     CheckBadAreas(d);
+
+
+    if (hitDelay > 0) {
+      hitDelay -= delta;
+      if (hitDelay <= 0) {
+        if (status == PlayerStatus.Death) animTree.Active = true;
+        else anim = (int)Anim.Idle;
+      }
+      return;
+    }
 
     switch (status) {
       case PlayerStatus.NONE: return;
@@ -171,13 +200,6 @@ public partial class Game : Node {
         return;
     }
 
-
-
-    if (hitDelay > 0) {
-      hitDelay -= delta;
-      anim = (int)Anim.Idle;
-      return;
-    }
 
     HandleMovement(d);
 
@@ -331,7 +353,6 @@ public partial class Game : Node {
         pos = interactionItem.Position + interactionItem.GlobalTransform.Basis.Z * .1f;
         pos.Y = 3f; // FIXME make it variable
         Player.Position = pos;
-        animTree.Set("parameters/TimeScale/scale", 1);
       }
     }
     else if (down) {
@@ -345,7 +366,6 @@ public partial class Game : Node {
         pos = interactionItem.Position - interactionItem.GlobalTransform.Basis.Z * .2f;
         pos.Y = interactionItem.MinMaxY.X;
         Player.Position = pos;
-        animTree.Set("parameters/TimeScale/scale", 1);
       }
     }
     else animTree.Set("parameters/TimeScale/scale", 0);
@@ -356,7 +376,6 @@ public partial class Game : Node {
       var pos = interactionItem.Position - interactionItem.GlobalTransform.Basis.Z * .2f;
       pos.Y = interactionItem.MinMaxY.X;
       Player.Position = pos;
-      animTree.Set("parameters/TimeScale/scale", 1);
     }
   }
 
@@ -432,21 +451,33 @@ public partial class Game : Node {
       if (up) {
         if (usedWeapon == ItemKatana) fighting = Anim.SwordL;
         else if (usedWeapon == ItemNunchaku) { fighting = Anim.SwordL; Nunchaku1.Visible = false; Nunchaku2.Visible = true; }
-        else fighting = Anim.FistL;
+        else {
+          fighting = Anim.FistL;
+          PlayerSound.Stream = Fists[rnd.RandiRange(0, 2)];
+          PlayerSound.Play();
+        }
         doit = true;
       }
       else if (left) {
         fighting = Anim.KickL;
+        PlayerSound.Stream = Kicks[rnd.RandiRange(0, 2)];
+        PlayerSound.Play();
         doit = true;
       }
       else if (down) {
         fighting = Anim.KickR;
+        PlayerSound.Stream = Kicks[rnd.RandiRange(0, 2)];
+        PlayerSound.Play();
         doit = true;
       }
       else if (right) {
         if (usedWeapon == ItemKatana) fighting = Anim.SwordR;
         else if (usedWeapon == ItemNunchaku) { fighting = Anim.SwordR; Nunchaku1.Visible = false; Nunchaku2.Visible = true; }
-        else fighting = Anim.FistR;
+        else {
+          fighting = Anim.FistR;
+          PlayerSound.Stream = Fists[rnd.RandiRange(0, 2)];
+          PlayerSound.Play();
+        }
         doit = true;
       }
       if (doit && fightTime <= 0) {
@@ -472,6 +503,8 @@ public partial class Game : Node {
         else if (usedWeapon == ItemNunchaku) { fighting = Anim.SwordL; Nunchaku1.Visible = false; Nunchaku2.Visible = true; }
         else fighting = Anim.FistL;
       }
+      PlayerSound.Stream = Fists[rnd.RandiRange(0, 2)];
+      PlayerSound.Play();
       if (fightTime <= 0) {
         SetStatus(PlayerStatus.Fight, fighting);
         fightTime = .5;
@@ -554,20 +587,16 @@ public partial class Game : Node {
   }
 
   private float CheckEnemiesFighting(float yAngle) {
-
     animTree.Set("parameters/TimeScale/scale", 1);
-    if (currentEnemy == null) { Dbg.Text = $"{yAngle:n0} no enemy"; return yAngle; } // No enemies
-    if (currentEnemy.status != Enemy.Status.Fighting && currentEnemy.status != Enemy.Status.StartFighitng) { Dbg.Text = $"{yAngle:n0} no fight"; return yAngle; } // No fighting
-    if (Player.Position.DistanceTo(currentEnemy.Position) > 5f) { Dbg.Text = $"{yAngle:n0} far away"; return yAngle; } // Far away
+    if (currentEnemy == null) return yAngle; // No enemies
+    if (currentEnemy.status != Enemy.Status.Fighting && currentEnemy.status != Enemy.Status.StartFighitng) return yAngle; // No fighting
+    if (Player.Position.DistanceTo(currentEnemy.Position) > 5f) return yAngle; // Far away
 
     // Calculate the angle that is going to the enemy
     float angle = 235 + r2d * Player.GlobalPosition.SignedAngleTo(currentEnemy.GlobalPosition - Player.GlobalPosition, Vector3.Up);
 
     // Round it to the 8 directions
     angle = (int)(angle / 45) * 45f;
-
-    Dbg.Text = $"{angle:n0}";
-
     animTree.Set("parameters/TimeScale/scale", -1); // Walk backward
     return angle;
   }
@@ -874,27 +903,42 @@ public partial class Game : Node {
   double hitDelay = 0;
   float Health = 100;
   int lives = 3; // FIXME we should show them somewhere
-  public bool HitPlayer(float strenght, bool handleHit = true) {
+
+  public bool IsPlayerDead { get { return status == PlayerStatus.Death; }}
+
+  bool HitPlayer(float strenght, bool handleHit = true) {
     // Reduce health, check if dead
     Health -= strenght;
     if (Health <= 0) {
       Health = 0;
       PowerBarMaterial.SetShaderParameter("Value", 0);
-      if (handleHit) hitDelay = 2;
+      if (handleHit) hitDelay = .1;
+      animTree.Active = false;
       SetStatus(PlayerStatus.Death, Anim.Dead);
+      PlayerSound.Stream = DeathSound;
+      PlayerSound.Play();
       return true;
     }
     if (handleHit) hitDelay = .5;
     SetStatus(PlayerStatus.Idle, rnd.RandiRange(0, 1) == 0 ? Anim.Hit1 : Anim.Hit2);
     // Play a hit animation stopping controls for half the anim
+    PlayerSound.Stream = Grunts[rnd.RandiRange(0, 3)];
+    PlayerSound.Play();
     return false;
   }
+
 
   internal void SetEnemy(Enemy enemy) {
     currentEnemy = enemy;
   }
 
+  internal void RegisterEnemyHitEvent(Enemy enemy) {
+    enemy.HitPlayer += Enemy_HitPlayer;
+  }
 
+  private void Enemy_HitPlayer(float amount) {
+    HitPlayer(amount);
+  }
 }
 
 public enum Rot { None = -1, TR = 0, T = 45, TL = 90, L = 135, BL = 180, B = 225, BR = 270, R = 315 };

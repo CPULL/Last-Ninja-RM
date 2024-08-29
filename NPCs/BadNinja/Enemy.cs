@@ -68,7 +68,11 @@ public partial class Enemy : Node3D {
       PowerBarMaterial = game.PowerBarEnemy.Material as ShaderMaterial;
       PowerBarMaterial.SetShaderParameter("Value", Health * .01f);
     }
+    game.RegisterEnemyHitEvent(this);
   }
+
+  [Signal]
+  public delegate void HitPlayerEventHandler(float amount);
 
 
   private void AnimationCompleted(StringName animName) {
@@ -89,6 +93,10 @@ public partial class Enemy : Node3D {
     float angle = r2d * (GlobalTransform.Basis.Z).SignedAngleTo(player.GlobalPosition - GlobalPosition, Vector3.Up);
 
     float d = (float)delta;
+
+    if (game.IsPlayerDead) status = Status.Won;
+
+
     switch (status) {
       case Status.Waiting:
         CheckPlayer(dist, angle);
@@ -111,7 +119,7 @@ public partial class Enemy : Node3D {
       hitDelay -= delta;
       if (hitDelay < 0) {
         if (dist <= distFight && angle > -10 && angle < 10) {
-          if (game.HitPlayer(Strenght)) status = Status.Won;
+          EmitSignal(SignalName.HitPlayer, Strenght);
         }
         anim = (int)Anim.Fight;
       }

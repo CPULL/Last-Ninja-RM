@@ -95,7 +95,7 @@ public partial class World {
       new(8f, 0.1f, -7.2f,  2f,2f,    Rot.BR, 2.2f,    GardenEntrance, 1),
       new(-7.84f, 0.1f, 12f,  3,3,    Rot.TR, 1f,      999, 0)
     }, new ItemDef[] { new(ItemType.Nunchaku,  2.7f, .1f, -4.966f,    0,0,0, 1f)  },
-    new EnemyDef[] { new(EnemyDef.EnemyType.BadNinjaPunch, -5.58f, 0.017f, -3.818f, -105, 8, 3.8f, 3f) }),
+    new EnemyDef[] { new(EnemyDef.EnemyType.BadNinjaPunch, -5.58f, 0.017f, -3.818f, -105, 8, 3.8f, 43f) }),
 
     new( "Garden North", new RoomPartDef[] {  // ########## 3
 
