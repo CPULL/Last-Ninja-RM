@@ -1,0 +1,30 @@
+[gd_scene format=3 uid="uid://diq3tfaj62y7j"]
+
+[node name="RoomManagerUI" type="MarginContainer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = -1720.0
+offset_bottom = -979.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 2
+theme_override_constants/margin_top = 2
+theme_override_constants/margin_right = 2
+theme_override_constants/margin_bottom = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+layout_mode = 2
+
+[node name="ButtonGenerate" type="Button" parent="VBoxContainer"]
+layout_mode = 2
+text = "Generate code"
+
+[node name="RoomIndex" type="LineEdit" parent="VBoxContainer"]
+layout_mode = 2
+text = "0"
+placeholder_text = "Room number"
+
+[node name="ButtonRecreate" type="Button" parent="VBoxContainer"]
+layout_mode = 2
+text = "Recreate room"

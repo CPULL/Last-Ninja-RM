@@ -1,0 +1,14 @@
+[gd_scene load_steps=4 format=3 uid="uid://dtp801pdlm8o8"]
+
+[ext_resource type="Texture2D" uid="uid://dwxmkrixujhjc" path="res://Scenery/Grass/Grass.jpg" id="1_p3752"]
+
+[sub_resource type="QuadMesh" id="QuadMesh_wq2cn"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_g7ymw"]
+albedo_color = Color(0, 0.561922, 0.0342855, 1)
+albedo_texture = ExtResource("1_p3752")
+
+[node name="Grass1" type="MeshInstance3D"]
+transform = Transform3D(0.707107, -0.707107, -3.09086e-08, 0, -4.37114e-08, 1, -0.707107, -0.707107, -3.09086e-08, 0, 0, 0)
+mesh = SubResource("QuadMesh_wq2cn")
+surface_material_override/0 = SubResource("StandardMaterial3D_g7ymw")

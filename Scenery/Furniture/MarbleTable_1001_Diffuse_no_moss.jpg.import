@@ -1,0 +1,38 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://dhxdm2ln8b8ti"
+path.s3tc="res://.godot/imported/MarbleTable_1001_Diffuse_no_moss.jpg-56507d560bd6c89564236192f71a8d42.s3tc.ctex"
+metadata={
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
+}
+generator_parameters={
+"md5": "bb9d68d844dabdde3b421ac7203e0e94"
+}
+
+[deps]
+
+source_file="res://Scenery/Furniture/MarbleTable_1001_Diffuse_no_moss.jpg"
+dest_files=["res://.godot/imported/MarbleTable_1001_Diffuse_no_moss.jpg-56507d560bd6c89564236192f71a8d42.s3tc.ctex"]
+
+[params]
+
+compress/mode=2
+compress/high_quality=false
+compress/lossy_quality=0.7
+compress/hdr_compression=1
+compress/normal_map=0
+compress/channel_pack=0
+mipmaps/generate=true
+mipmaps/limit=-1
+roughness/mode=0
+roughness/src_normal=""
+process/fix_alpha_border=true
+process/premult_alpha=false
+process/normal_map_invert_y=false
+process/hdr_as_srgb=false
+process/hdr_clamp_exposure=false
+process/size_limit=0
+detect_3d/compress_to=0

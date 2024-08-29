@@ -1,0 +1,30 @@
+[gd_scene load_steps=7 format=3 uid="uid://w6mgxaiyfi0r"]
+
+[ext_resource type="Shader" path="res://Scenery/Roads/Road.gdshader" id="1_rh1h7"]
+[ext_resource type="Texture2D" uid="uid://kbk5txf45hiq" path="res://Scenery/Roads/Road3_n.png" id="2_ir45k"]
+[ext_resource type="Texture2D" uid="uid://djbjnddbxcjss" path="res://Scenery/Roads/Road3.png" id="2_q64t3"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_d7w3w"]
+render_priority = 0
+shader = ExtResource("1_rh1h7")
+shader_parameter/RoadTexture = ExtResource("2_q64t3")
+shader_parameter/NormalTexture = ExtResource("2_ir45k")
+
+[sub_resource type="QuadMesh" id="QuadMesh_jesn5"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_ugqbq"]
+size = Vector3(1, 1, 0.0428467)
+
+[node name="Road" type="MeshInstance3D"]
+transform = Transform3D(4, 0, 0, 0, -1.74846e-07, 1, 0, -4, -4.37114e-08, 0, 0.01, 0)
+layers = 2
+material_override = SubResource("ShaderMaterial_d7w3w")
+mesh = SubResource("QuadMesh_jesn5")
+
+[node name="Area3D" type="Area3D" parent="."]
+collision_layer = 2
+collision_mask = 2
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Area3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.64906e-16, -0.0238647)
+shape = SubResource("BoxShape3D_ugqbq")

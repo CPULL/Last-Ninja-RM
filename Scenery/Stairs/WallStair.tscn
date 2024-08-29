@@ -1,0 +1,36 @@
+[gd_scene load_steps=6 format=3 uid="uid://bne2irl7umsr0"]
+
+[ext_resource type="Texture2D" uid="uid://d2mlvp3bekor7" path="res://Scenery/Buildings/WallStair1.png" id="1_vx1eq"]
+[ext_resource type="Script" path="res://Scripts/Pickable.cs" id="2_2ctn6"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_4ldpf"]
+transparency = 1
+albedo_texture = ExtResource("1_vx1eq")
+
+[sub_resource type="QuadMesh" id="QuadMesh_yiycn"]
+material = SubResource("StandardMaterial3D_4ldpf")
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_3f8db"]
+size = Vector3(0.6, 0.2, 0.4)
+
+[node name="WallStair" type="Node3D" node_paths=PackedStringArray("MeshInstance")]
+script = ExtResource("2_2ctn6")
+ItemType = 4
+MeshInstance = NodePath("MeshInstance3D")
+MinMaxY = Vector2(0.05, 1.5)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+transform = Transform3D(-0.2, 0, -8.74228e-08, 0, 1, 0, 1.74846e-08, 0, -1, 0, 0.5, 0)
+mesh = SubResource("QuadMesh_yiycn")
+
+[node name="Area3D" type="Area3D" parent="."]
+collision_layer = 8
+collision_mask = 8
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Area3D" node_paths=PackedStringArray("MeshInstance")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.1, 0)
+shape = SubResource("BoxShape3D_3f8db")
+script = ExtResource("2_2ctn6")
+ItemType = 4
+MeshInstance = NodePath("../../MeshInstance3D")
+metadata/_edit_group_ = true

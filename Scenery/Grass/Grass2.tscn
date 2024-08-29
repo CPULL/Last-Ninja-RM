@@ -1,0 +1,66 @@
+[gd_scene load_steps=3 format=3 uid="uid://b1w7p0d3fx8cx"]
+
+[ext_resource type="ArrayMesh" uid="uid://0xyrwxx1dij1" path="res://Scenery/Grass/Grass2.res" id="1_hj1t3"]
+[ext_resource type="ArrayMesh" uid="uid://bbqne07n43wm4" path="res://Scenery/Grass/Grass3.res" id="2_1h6qn"]
+
+[node name="Grass2" type="Node3D"]
+
+[node name="Grass01" type="MeshInstance3D" parent="."]
+transform = Transform3D(0.976542, 0, 0.504423, 0, 1.07939, 0, -0.50306, 0, 0.979187, 0.864175, 0, 0.302825)
+mesh = ExtResource("1_hj1t3")
+skeleton = NodePath("../../..")
+
+[node name="Grass02" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.29262, 0, 1.16112)
+mesh = ExtResource("1_hj1t3")
+skeleton = NodePath("../../..")
+
+[node name="Grass03" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.325733, 0, 1.6108)
+mesh = ExtResource("2_1h6qn")
+skeleton = NodePath("../../..")
+
+[node name="Grass04" type="MeshInstance3D" parent="."]
+transform = Transform3D(-1.05926, 0, -0.291762, 0, 1.07939, 0, 0.290974, 0, -1.06213, -1.13006, 0, 0.495237)
+mesh = ExtResource("1_hj1t3")
+skeleton = NodePath("../../..")
+
+[node name="Grass05" type="MeshInstance3D" parent="."]
+transform = Transform3D(-0.978527, 0, 0.206119, 0, 1, 0, -0.206119, 0, -0.978527, 0.73052, 0, 1.54108)
+mesh = ExtResource("1_hj1t3")
+skeleton = NodePath("../../..")
+
+[node name="Grass06" type="MeshInstance3D" parent="."]
+transform = Transform3D(-1.19587, 0, 0.157145, 0, 1, 0, -0.251901, 0, -0.746029, -0.507441, 0, -1.41517)
+mesh = ExtResource("2_1h6qn")
+skeleton = NodePath("../../..")
+
+[node name="Grass07" type="MeshInstance3D" parent="."]
+transform = Transform3D(-0.35321, 0, 1.04298, 0, 1.07939, 0, -1.04017, 0, -0.354167, -1.46236, 0, -0.769726)
+mesh = ExtResource("1_hj1t3")
+skeleton = NodePath("../../..")
+
+[node name="Grass08" type="MeshInstance3D" parent="."]
+transform = Transform3D(0.147792, 0, 0.989018, 0, 1, 0, -0.989018, 0, 0.147792, 0.628217, 0, -1.52962)
+mesh = ExtResource("1_hj1t3")
+skeleton = NodePath("../../..")
+
+[node name="Grass09" type="MeshInstance3D" parent="."]
+transform = Transform3D(0.147792, 0, 0.989018, 0, 1, 0, -0.989018, 0, 0.147792, -0.344612, 0, 0.600423)
+mesh = ExtResource("2_1h6qn")
+skeleton = NodePath("../../..")
+
+[node name="Grass10" type="MeshInstance3D" parent="."]
+transform = Transform3D(0.164468, 0, -1.12692, 0, 0.958807, 0, 1.36689, 0, 0.135594, 0.669715, 0, -0.937049)
+mesh = ExtResource("1_hj1t3")
+skeleton = NodePath("../../..")
+
+[node name="Grass11" type="MeshInstance3D" parent="."]
+transform = Transform3D(-0.348474, 0, -0.937318, 0, 1, 0, 0.937318, 0, -0.348474, -0.25746, 0, -0.454535)
+mesh = ExtResource("1_hj1t3")
+skeleton = NodePath("../../..")
+
+[node name="Grass12" type="MeshInstance3D" parent="."]
+transform = Transform3D(-0.434444, 0, -0.538965, 0, 1.17233, 0, 1.16856, 0, -0.200375, -1.95846, 0, -0.0606971)
+mesh = ExtResource("2_1h6qn")
+skeleton = NodePath("../../..")

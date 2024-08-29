@@ -1,0 +1,18 @@
+[gd_scene load_steps=3 format=3 uid="uid://dke0tvabpuvar"]
+
+[ext_resource type="PackedScene" uid="uid://kyh8glt1nyig" path="res://Scenery/Furniture/StandingBox.blend" id="1_82y0g"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_ip0eo"]
+size = Vector3(1.99989, 0.350586, 1.88141)
+
+[node name="StandingBox" type="Node3D"]
+
+[node name="StandingBoxMesh" parent="." instance=ExtResource("1_82y0g")]
+
+[node name="Area3D" type="Area3D" parent="."]
+collision_layer = 4
+collision_mask = 4
+
+[node name="Collider" type="CollisionShape3D" parent="Area3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0049696, -0.324707, -0.0629652)
+shape = SubResource("BoxShape3D_ip0eo")

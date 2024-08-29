@@ -1,0 +1,28 @@
+[gd_scene load_steps=7 format=3 uid="uid://dffs6sq887mi6"]
+
+[ext_resource type="Texture2D" uid="uid://bwxim6ag1kqo3" path="res://Scenery/Buildings/Wall1.png" id="1_o682r"]
+[ext_resource type="Shader" path="res://Scenery/Buildings/Wall.gdshader" id="1_xidum"]
+[ext_resource type="Texture2D" uid="uid://cxvopwm0enky5" path="res://Scenery/Buildings/Wall1_n.png" id="2_06mt2"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_j5o7l"]
+render_priority = 0
+shader = ExtResource("1_xidum")
+shader_parameter/WallTexture = ExtResource("1_o682r")
+shader_parameter/NormalTexture = ExtResource("2_06mt2")
+
+[sub_resource type="QuadMesh" id="QuadMesh_f72yw"]
+material = SubResource("ShaderMaterial_j5o7l")
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_62crx"]
+
+[node name="Wall1" type="MeshInstance3D"]
+transform = Transform3D(10, 0, 0, 0, 5, 0, 0, 0, 1, 0, 0, 0)
+mesh = SubResource("QuadMesh_f72yw")
+
+[node name="Area3D" type="Area3D" parent="."]
+collision_layer = 4
+collision_mask = 4
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Area3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.5)
+shape = SubResource("BoxShape3D_62crx")

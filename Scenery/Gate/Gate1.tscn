@@ -1,0 +1,27 @@
+[gd_scene load_steps=4 format=3 uid="uid://ct5axuplug4qt"]
+
+[ext_resource type="ArrayMesh" uid="uid://c24p3mkqx5ik" path="res://Scenery/Gate/Gate1.res" id="1_uafp4"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_eb45n"]
+size = Vector3(1.72119, 3.21188, 1.94733)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_6ppss"]
+size = Vector3(1.74701, 3.11661, 2.0462)
+
+[node name="Gate1" type="Node3D"]
+
+[node name="GateMesh" type="MeshInstance3D" parent="."]
+mesh = ExtResource("1_uafp4")
+
+[node name="Area3D" type="Area3D" parent="."]
+collision_layer = 4
+collision_mask = 4
+collision_priority = 2.0
+
+[node name="CollisionL" type="CollisionShape3D" parent="Area3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.84898, 1.61827, 0.0397045)
+shape = SubResource("BoxShape3D_eb45n")
+
+[node name="CollisionR" type="CollisionShape3D" parent="Area3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.98778, 1.55795, -0.000518799)
+shape = SubResource("BoxShape3D_6ppss")

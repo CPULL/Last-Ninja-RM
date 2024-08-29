@@ -1,0 +1,7 @@
+[gd_scene load_steps=2 format=3 uid="uid://csthn7ublh2pc"]
+
+[ext_resource type="ArrayMesh" uid="uid://ddhg8w2x8qdfe" path="res://Scenery/Bush2/Bush2.res" id="1_vx8ep"]
+
+[node name="Bush2" type="MeshInstance3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.83716, 0, -1.47455)
+mesh = ExtResource("1_vx8ep")

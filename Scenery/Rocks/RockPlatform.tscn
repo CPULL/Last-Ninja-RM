@@ -1,0 +1,18 @@
+[gd_scene load_steps=3 format=3 uid="uid://7q5gvfx56d5g"]
+
+[ext_resource type="PackedScene" uid="uid://bpul2v0xpm0ji" path="res://Scenery/Rocks/Rock3.glb" id="1_pri51"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_wtn4h"]
+size = Vector3(1, 0.230957, 1)
+
+[node name="RockPlatform" type="Node3D"]
+
+[node name="RockA" parent="." instance=ExtResource("1_pri51")]
+
+[node name="Area3D" type="Area3D" parent="."]
+collision_layer = 2
+collision_mask = 2
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Area3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.04, 0)
+shape = SubResource("BoxShape3D_wtn4h")
