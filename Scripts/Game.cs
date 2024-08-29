@@ -36,7 +36,8 @@ public partial class Game : Node {
   [ExportGroup("Audio")]
   [Export] AudioStreamPlayer Music, PlayerSound, OtherSound;
   [Export] AudioStream IntroMusic;
-  [Export] AudioStream PickupSound, WaterSplash, WaterStep1, WaterStep2, WaterStep3;
+  [Export] AudioStream PickupSound, WaterSplash;
+  [Export] AudioStream[] WaterSteps;
 
   ShaderMaterial PowerBarMaterial;
   public readonly List<Enemy> enemies = new();
@@ -533,6 +534,25 @@ public partial class Game : Node {
 
   }
 
+  public void PlayerStepDone() {
+    var gp = Player.GlobalPosition;
+    gp.Y += 5.5f;
+    RayCastGround.GlobalPosition = gp;
+    RayCastRisk.GlobalPosition = gp;
+    float groundY = -1;
+    float riskY = -1;
+    if (RayCastGround.IsColliding()) groundY = RayCastGround.GetCollisionPoint().Y;
+    if (RayCastRisk.IsColliding()) riskY = RayCastRisk.GetCollisionPoint().Y;
+
+    if (groundY > riskY) { // Normal step sound
+    }
+    else { // Water sound FIXME we can do lava or other bad sounds in future
+      PlayerSound.Stream = WaterSteps[rnd.RandiRange(0, 3)];
+      PlayerSound.Play();
+    }
+
+  }
+
   private float CheckEnemiesFighting(float yAngle) {
 
     animTree.Set("parameters/TimeScale/scale", 1);
@@ -721,24 +741,6 @@ public partial class Game : Node {
       return false;
     }
 
-    //    float groundY = -1;
-    //    float riskY = -1;
-
-    //    // Check if we should fall
-    //    if (RayCastGround.IsColliding()) groundY = RayCastGround.GetCollisionPoint().Y;
-    //    if (RayCastRisk.IsColliding()) riskY = RayCastRisk.GetCollisionPoint().Y;
-    //    float resY;
-    //    if (groundY > riskY) resY = groundY;
-    //    else resY = riskY;
-    //    if (resY == -1) {
-    //    }
-    //    if (Mathf.Abs(groundY - Player.Position.Y) < .6f) return; // No obstacles and no enemy and not too much difference in terrain level
-    //    if (status != PlayerStatus.Jump && status != PlayerStatus.Climb && Player.Position.Y > resY + .6f) { // Fall
-    //      SetStatus(PlayerStatus.Fall, Anim.Fall);
-    //    }
-    //
-
-
     move = Vector3.Zero;
     return false;
   }
@@ -891,6 +893,8 @@ public partial class Game : Node {
   internal void SetEnemy(Enemy enemy) {
     currentEnemy = enemy;
   }
+
+
 }
 
 public enum Rot { None = -1, TR = 0, T = 45, TL = 90, L = 135, BL = 180, B = 225, BR = 270, R = 315 };

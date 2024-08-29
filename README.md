@@ -1,16 +1,16 @@
 # Last Ninja RM
- A Creative Common remake of Laast Ninaj C64 games
+ A Creative Common remake of Last Ninja C64 games
 
 
 ![Ninja](https://github.com/CPULL/Last-Ninja-RM/blob/main/Gfx/UI/Icon.svg)
 
 
 ## About
-The game is made with Godot (4.3)
+The game is made with Godot (4.3), code is mostly C# but there is a littel bit of GDScript and GDShader.
 It is done as 3d game with isometric camera projection, and shaders to make it visuals _retro_.
-It has no license, it is just a fan made game, inspired by the original.
+I have no license to do it, so it is just a fan made game, inspired by the original.
 
-Levels will not be the same os the original (but will be inspired by, mostly the locations), gameplay will be very similar.
+Levels will not be the same as the original (but will be inspired by, mostly the locations), gameplay will be very similar.
 
 ## Assets
 All assets, except music, are created from scratsh or collected from Creative Common (and similar) sources.
