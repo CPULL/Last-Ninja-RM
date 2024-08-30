@@ -3,8 +3,7 @@ using LastNinjaRM;
 using System;
 
 public partial class Enemy : Node3D {
-  [Export] AnimationPlayer animPlayer;
-  [Export] AnimationTree animTree;
+  [Export] AnimationPlayer anim;
   [Export] Vector3 StartLocation;
   [Export] float StartAngle;
   [Export] float AttackDistance;
@@ -14,8 +13,7 @@ public partial class Enemy : Node3D {
   [Export] RayCast3D RaycastObstacle;
   [Export] float Health = 100;
 
-  [Export] public int anim = (int)Anim.Idle;
-  [Export] public Status status = Status.Waiting;
+  [Export] public Status status = Status.Idle;
   [Export] EnemyType enemyType; // FIXME we need to tweak all code depending on the type
   [Export] Label Dbg;
 
@@ -29,26 +27,66 @@ public partial class Enemy : Node3D {
 
   public enum Anim { Idle = 0, Run = 1, Ragdoll = 2, Fight = 3, PunchR = 4, PunchL = 5, Hit1 = 6, Hit2 = 7 };
 
-  public enum Status { Waiting, StartFighitng, Fighting, Dead, Won }
+  StringName AnimIdle = "Idle";
+  StringName AnimRun = "Run";
+  StringName AnimRagdoll = "Ragdoll";
+  StringName AnimFight = "Fight";
+  StringName AnimPunchR = "PunchR";
+  StringName AnimPunchL = "PunchL";
+  StringName AnimHit1 = "Hit1";
+  StringName AnimHit2 = "Hit2";
+  StringName AnimTurnR = "TurnR";
+  StringName AnimTurnL = "TurnL";
+
+  public enum Status { Idle, StartRun, Run, Fight, Punch, BeingHit, Dead, Won }
+
+
+  /*
+   
+   State Machine
+
+   Idle -> can only wait to see player -> StartRun
+   StartRun -> Run
+   Run -> can only wait to be close to the player and moves to Fight, if Hit moves to Hit (or Dead)
+   Fight -> can rotate to face the player; waits between shots, the triggers Punch; if player is too far away triggers -> Run; in case Hit  moves to Hit (or Dead)
+   Punch -> waits to complete the hit and damages player eventually; in case Hit moves to Hit (or Dead)
+   Hit -> waits a short while then checks if the player is close or not and go in Run or Fight
+   
+   
+   */
+
+
 
   const float distFight = 1.1f;
-  bool punching = false;
-  bool beingHit = false;
   const float r2d = 180f / Mathf.Pi;
+  bool lastPunchRight = false;
+  bool fighting = false; // Do we need it?
+  StringName ca = "";
+  float waitForPunch = 0;
+  float checkHitDelay = 0;
+  float beingHitDelay = 0;
+
+  public bool IsPursuing => status == Enemy.Status.Fight || status == Enemy.Status.Run || status == Enemy.Status.StartRun;
 
   public override void _Ready() {
-    var a = animPlayer.GetAnimation("Idle");
-    a.LoopMode = Animation.LoopModeEnum.Pingpong;
-    a = animPlayer.GetAnimation("Run");
-    a.LoopMode = Animation.LoopModeEnum.Linear;
+    //Engine.TimeScale = .5f;
 
-    animTree.AnimationFinished += AnimationCompleted;
+    var a = anim.GetAnimation(AnimIdle);
+    a.LoopMode = Animation.LoopModeEnum.Pingpong;
+    a = anim.GetAnimation(AnimRun);
+    a.LoopMode = Animation.LoopModeEnum.Linear;
+    a = anim.GetAnimation(AnimFight);
+    a.LoopMode = Animation.LoopModeEnum.Linear;
+    a = anim.GetAnimation(AnimTurnR);
+    a.LoopMode = Animation.LoopModeEnum.Linear;
+    a = anim.GetAnimation(AnimTurnL);
+    a.LoopMode = Animation.LoopModeEnum.Linear;
   }
   public void Start(Game g, EnemyDef src) {
     game = g;
     player = g.Player;
-    anim = (int)Anim.Idle;
-    status = Status.Waiting;
+    SetAnim(AnimIdle);
+    SetStatus(Status.Idle);
     Position = StartLocation;
     RotationDegrees = new(0, StartAngle, 0);
 
@@ -61,70 +99,77 @@ public partial class Enemy : Node3D {
       Position = new(source.DeathPos.X, source.DeathPos.Y, source.DeathPos.Z);
       RotationDegrees = new(0, source.DeathPos.W, 0);
       death = true;
-      anim = (int)Anim.Ragdoll;
+      anim.Play(AnimRagdoll, -1, 200);
       Health = 0;
-    }
-    else {
       PowerBarMaterial = game.PowerBarEnemy.Material as ShaderMaterial;
-      PowerBarMaterial.SetShaderParameter("Value", Health * .01f);
+      PowerBarMaterial?.SetShaderParameter("Value", 0);
     }
     game.RegisterEnemyHitEvent(this);
+  }
+
+  protected override void Dispose(bool disposing) {
+    game.RemoveEnemyHitEvent(this);
+    base.Dispose(disposing);
   }
 
   [Signal]
   public delegate void HitPlayerEventHandler(float amount);
 
 
-  private void AnimationCompleted(StringName animName) {
-    if (animName == "PunchL" || animName == "PunchR") {
-      punching = false;
-      anim = (int)Anim.Fight;
-    }
-    if (animName == "Hit1" || animName == "Hit2") {
-      beingHit = false;
-      anim = (int)Anim.Fight;
-    }
+
+
+  void SetAnim(StringName a)  {
+    if (ca == a) return;
+    ca = a;
+    anim.Play(a);
   }
 
-
-  public override void _Process(double delta) {
-    if (death || player == null) return;
-    float dist = GlobalPosition.DistanceTo(player.GlobalPosition);
-    float angle = r2d * (GlobalTransform.Basis.Z).SignedAngleTo(player.GlobalPosition - GlobalPosition, Vector3.Up);
-
-    float d = (float)delta;
-
-    if (game.IsPlayerDead) status = Status.Won;
-
-
-    switch (status) {
-      case Status.Waiting:
-        CheckPlayer(dist, angle);
+  void SetStatus(Status s) {
+    if (s == status) return;
+    switch (s) {
+      case Status.Idle:
+        waitForPunch = .5f;
+        SetAnim(AnimIdle);
         break;
-      case Status.StartFighitng:
-        MoveForward(d);
+      case Status.StartRun:
+        waitForPunch = .2f;
+        SetAnim(AnimRun);
         break;
-      case Status.Fighting:
-        if (punching || beingHit) return; // We should not move if we are playing an anim for punching or being hit
-        if (dist <= distFight || punchDelay > 0) Fight(d, dist, angle);
-        else Run(d, angle);
+      case Status.Run:
+        waitForPunch = .2f;
+        SetAnim(AnimRun);
+        break;
+      case Status.Fight:
+        SetAnim(AnimFight);
+        break;
+      case Status.Punch:
+        break;
+      case Status.BeingHit:
+        waitForPunch = rnd.RandfRange(.1f, .3f);
         break;
       case Status.Dead:
         break;
       case Status.Won:
         break;
     }
+    status = s;
+  }
 
-    if (hitDelay > 0) {
-      hitDelay -= delta;
-      if (hitDelay < 0) {
-        if (dist <= distFight && angle > -10 && angle < 10) {
-          EmitSignal(SignalName.HitPlayer, Strenght);
-        }
-        anim = (int)Anim.Fight;
-      }
-    }
+  public override void _Process(double delta) {
+    Dbg.Text = $"{status} {ca}  P{waitForPunch:F1} H{checkHitDelay:F1} B{beingHitDelay:F1}";
 
+    
+
+    if (death || player == null || status == Status.Won) return;
+
+    // Always get angle and distance between Player and Enemy
+    float dist = GlobalPosition.DistanceTo(player.GlobalPosition);
+    float angle = r2d * (GlobalTransform.Basis.Z).SignedAngleTo(player.GlobalPosition - GlobalPosition, Vector3.Up);
+    float d = (float)delta;
+
+    if (game.IsPlayerDead) SetStatus(Status.Won);
+
+    // Update health progress bar
     if (PowerBarMaterial != null) {
       double val = PowerBarMaterial.GetShaderParameter("Value").AsDouble();
       if (val > Health * .01) {
@@ -136,33 +181,71 @@ public partial class Enemy : Node3D {
         PowerBarMaterial.SetShaderParameter("Value", 0);
       }
     }
+
+
+    switch (status) { // In all statuses if the enemy is Hit then there is the transition to Hit (or Dead)
+      case Status.Idle: // can only wait to see player -> run
+        CheckPlayer(dist, angle);
+        break;
+      case Status.StartRun: // Move forward to exit the boot, then switch to the Run status
+        MoveForward(d);
+        break;
+      case Status.Run: // Try to reach the player, if close enough -> Fight
+        if (dist <= distFight) SetStatus(Status.Fight);
+        else Run(d, angle);
+        break;
+      case Status.Fight: // Can rotate to face the player; waits between shots, the triggers Punch; if player is too far away triggers -> Run
+        Fight(d, dist, angle);
+        break;
+      case Status.Punch: // Wait for the expected time and check if we hit the player
+        Punch(d, dist, angle);
+        break;
+      case Status.BeingHit: // Just wait for the anim to complete
+        beingHitDelay -= d;
+        if (beingHitDelay < 0) SetStatus(Status.Fight);
+        break;
+      case Status.Dead:
+        break;
+      case Status.Won:
+        break;
+    }
   }
 
 
+
+
+  // ************************************************************************************************************************
+
+
+  void CheckPlayer(float dist, float angle) {
+    if (dist < 2f) { // We are very close, we ignore the angle
+      SetStatus(Status.StartRun); // We need to move forward to exit the boot, ignoring the colliders
+      game.SetEnemy(this);
+    }
+    if (dist < AttackDistance) {
+      if (Mathf.Abs(angle) < 75) {
+        SetStatus(Status.StartRun); // We need to move forward to exit the boot, ignoring the colliders
+        game.SetEnemy(this);
+      }
+    }
+  }
+
   void MoveForward(float d) {
-    anim = (int)Anim.Run;
     Vector3 forward = GlobalTransform.Basis.Z;
     Position += forward * d * Speed;
     forwardTime += d;
     if (forwardTime > .5) {
       forwardTime = 0;
-      status = Status.Fighting;
+      SetStatus(Status.Run);
       game.SetEnemy(this);
     }
   }
 
-  private void Run(float delta, float angle) {
-    Dbg.Text = $"Running    {Health}";
-    anim = (int)Anim.Run;
-    lastPunch = 0;
-    punchDelay = 0;
-    hitDelay = 0;
+  void Run(float delta, float angle) {
+    waitForPunch = 0.1f; // Reset the wait
 
     float dirAngle = delta * 2 * angle + RotationDegrees.Y;
     RotationDegrees = new(0, dirAngle, 0);
-
-    // Move in 8 directions only, using the provided speed
-
     float absAngle = Math.Abs(angle);
     Vector3 move;
     if (absAngle < 10) {
@@ -170,6 +253,7 @@ public partial class Enemy : Node3D {
       move = (player.GlobalPosition - GlobalPosition).Normalized() * Speed * delta;
     }
     else {
+      // Move forward
       float speedMalus = (180f - absAngle) / 180f;
       move = GlobalTransform.Basis.Z.Normalized() * Speed * delta * speedMalus;
     }
@@ -180,101 +264,110 @@ public partial class Enemy : Node3D {
     gp.Y += .1f;
     RaycastGround.GlobalPosition = gp;
     if (!RaycastGround.IsColliding()) {
-      anim = (int)Anim.Idle;
-      return; // Not on floor
+      var rot = RotationDegrees;
+      rot.Y += 180;
+      RotationDegrees = rot;
+      return; // Not on floor, bump back
     }
     // Check obstacles
     RaycastObstacle.GlobalPosition = gp;
     if (RaycastObstacle.IsColliding()) {
-      anim = (int)Anim.Idle;
-      return; // Over collider
+      // Try to turn around following the forward axys of the collider
+      if (RaycastObstacle.GetCollider() is Node3D c) {
+        var rot = c.RotationDegrees;
+        rot.Y -= 90;
+        GlobalRotationDegrees = rot;
+        SetStatus(Status.StartRun);
+        return;
+      }
+
+      SetAnim(AnimIdle);
+      return; // Over collider, we cannot walk
     }
 
     Position += move;
   }
 
-  float lastPunch = 0; // Delay between punches
-  float punchDelay = 0; // Time for a punch to complete
-  double hitDelay = 0;
-  bool lastPunchRight = false;
-
-  private void Fight(float d, float dist, float angle) {
-    anim = (int)Anim.Fight;
+  void Fight(float d, float dist, float angle) {
+    if (dist > distFight) {
+      SetStatus(Status.Run);
+      return;
+    }
 
     if (angle > 10 || angle < -10) {
-      float dirAngle = d * 2.5f * angle + RotationDegrees.Y;
+      float dirAngle = d * 3.5f * angle + RotationDegrees.Y;
       RotationDegrees = new(0, dirAngle, 0);
+      if (angle > 0) SetAnim(AnimTurnR);
+      else SetAnim(AnimTurnR);
       return;
     }
+    SetAnim(AnimFight);
 
-    if (punchDelay > 0) {
-      punchDelay -= d;
+    if (waitForPunch > 0) { // Wait between punches
+      waitForPunch -= d;
       return;
     }
-    lastPunch -= d;
-    if (lastPunch > 0 || punching || beingHit) return;
 
     if (lastPunchRight) {
-      if (rnd.RandiRange(0, 2) == 0) { 
-        anim = (int)Anim.PunchR;
-        punchDelay = .8333f;
-        hitDelay = .2;
+      if (rnd.RandiRange(0, 2) == 0) {
+        SetAnim(AnimPunchR);
       }
       else {
-        anim = (int)Anim.PunchL;
-        punchDelay = .8333f;
-        hitDelay = .2;
+        SetAnim(AnimPunchL);
         lastPunchRight = false;
       }
     }
     else {
       if (rnd.RandiRange(0, 2) == 0) {
-        anim = (int)Anim.PunchL;
-        punchDelay = .8333f;
-        hitDelay = .2;
+        SetAnim(AnimPunchL);
       }
       else {
-        anim = (int)Anim.PunchR;
-        punchDelay = .8333f;
-        hitDelay = .2;
+        SetAnim(AnimPunchR);
         lastPunchRight = true;
       }
     }
-    lastPunch = rnd.RandfRange(.1f, .5f);
-    Dbg.Text = $"    {Health}";
+    waitForPunch = rnd.RandfRange(.8333f, 1f);
+    checkHitDelay = .2f;
+    SetStatus(Status.Punch);
   }
 
-  public float Hit(float amount, bool strong) {
+  void Punch(float d, float dist, float angle) {
+    checkHitDelay -= d;
+    if (checkHitDelay <= 0) {
+      if (dist <= distFight && angle > -10 && angle < 10) {
+        EmitSignal(SignalName.HitPlayer, Strenght);
+      }
+      SetStatus(Status.Fight);
+    }
+  }
+
+  public float HitEnemy(float amount, bool strong) {
     if (death) return 0;
-    Health -= amount;
-    anim = strong ? (int)Anim.Hit2 : (int)Anim.Hit1;
+
+    if (beingHitDelay > 0) {
+      Health -= amount * .25f; // If already hit gets less damage
+    }
+    else Health -= amount;
+    SetAnim(rnd.RandiRange(0, 1) == 0 ? AnimHit2 : AnimHit1);
 
     if (Health <= 0) {
       death = true;
-      anim = (int)Anim.Ragdoll;
+      SetStatus(Status.Dead);
       source.DeathPos.X = Position.X;
       source.DeathPos.Y = Position.Y;
       source.DeathPos.Z = Position.Z;
       source.DeathPos.W = RotationDegrees.Y;
       source.Defeated = true;
     }
+    else if (beingHitDelay <= 0) {
+      beingHitDelay = 1.15f;
+    }
+    SetStatus(Status.BeingHit);
 
     return Health;
   }
 
 
-  void CheckPlayer(float dist, float angle) {
-    if (dist < 2f) { // We are very close, we ignore the angle
-      status = Status.StartFighitng; // We need to move forward to exit the boot, ignoring the colliders
-      game.SetEnemy(this);
-    }
-    if (dist < AttackDistance) {
-      if (Mathf.Abs(angle) < 75) {
-        status = Status.StartFighitng; // We need to move forward to exit the boot, ignoring the colliders
-        game.SetEnemy(this);
-      }
-    }
-  }
 
   public bool IsDead() => death;
 

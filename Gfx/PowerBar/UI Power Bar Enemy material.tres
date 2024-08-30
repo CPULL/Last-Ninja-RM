@@ -1,0 +1,10 @@
+[gd_resource type="ShaderMaterial" load_steps=3 format=3 uid="uid://5vu11tr5xf0m"]
+
+[ext_resource type="Shader" path="res://Gfx/PowerBar/EnergyBar.gdshader" id="1_ebwr4"]
+[ext_resource type="Texture2D" uid="uid://cfavjxaqt8ehr" path="res://Gfx/PowerBar/PowerBarE.png" id="2_4non3"]
+
+[resource]
+shader = ExtResource("1_ebwr4")
+shader_parameter/Value = 0.5
+shader_parameter/Col = null
+shader_parameter/BarTxt = ExtResource("2_4non3")

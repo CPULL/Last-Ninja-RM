@@ -89,13 +89,13 @@ public partial class World {
     new(PartType.Rock1,          -4.242f,   0.000f,   8.704f,      1.00f, 1.00f, 1.00f,        0, 5, 0      ),
     new(PartType.Rock2,           3.936f,   0.000f,  -3.261f,      2.00f, 0.20f, 2.00f,        0, 0, 0      ),
     new(PartType.Rock2,          -3.682f,   0.000f,   0.006f,      1.95f, 0.74f, 1.29f,        0, 61, 0     ),
-    new(PartType.StandingBox,    -5.502f,   0.000f,  -3.900f,      1.00f, 1.00f, 1.00f,        0, 80, 0     ),
+    new(PartType.StandingBox,    -5.502f,   0.000f,  -3.900f,      1.00f, 1.00f, 1.00f,        0, 260, 0    ),
 
     }, new Portal[] {
       new(8f, 0.1f, -7.2f,  2f,2f,    Rot.BR, 2.2f,    GardenEntrance, 1),
       new(-7.84f, 0.1f, 12f,  3,3,    Rot.TR, 1f,      999, 0)
     }, new ItemDef[] { new(ItemType.Nunchaku,  2.7f, .1f, -4.966f,    0,0,0, 1f)  },
-    new EnemyDef[] { new(EnemyDef.EnemyType.BadNinjaPunch, -5.58f, 0.017f, -3.818f, -105, 8, 3.8f, 43f) }),
+    new EnemyDef[] { new(EnemyDef.EnemyType.BadNinjaPunch, -5.58f, 0.017f, -3.818f, -105, 8, 3.8f, 1f) }),
 
     new( "Garden North", new RoomPartDef[] {  // ########## 3
 

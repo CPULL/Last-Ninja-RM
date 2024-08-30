@@ -36,7 +36,7 @@ public partial class Game : Node {
   [ExportGroup("Audio")]
   [Export] AudioStreamPlayer Music, PlayerSound, OtherSound;
   [Export] AudioStream IntroMusic;
-  [Export] AudioStream PickupSound, WaterSplash, DeathSound;
+  [Export] AudioStream PickupSound, WaterSplash, DeathSound, JumpSound;
   [Export] AudioStream[] WaterSteps, Fists, Kicks, Grunts;
 
   ShaderMaterial PowerBarMaterial;
@@ -147,7 +147,9 @@ public partial class Game : Node {
   }
 
   public override void _Process(double delta) {
-    Dbg.Text = $"{anim} {status} {hitDelay:f} {sm?.GetCurrentNode()}";
+    // FIXME    Dbg.Text = $"{anim} {status} {hitDelay:f} {sm?.GetCurrentNode()}";
+
+    Dbg.Text = $"{currentEnemy}";
 
     if (Engine.IsEditorHint() || status == PlayerStatus.NONE) return;
     float d = (float)delta;
@@ -216,7 +218,7 @@ public partial class Game : Node {
         // Check if we hit an enemy
         foreach (var e in enemies) {
           if (e.IsDead()) continue;
-          float angle = r2d * move.SignedAngleTo(e.GlobalPosition - Player.GlobalPosition, Vector3.Up);
+          float angle = r2d * Player.GlobalTransform.Basis.Z.SignedAngleTo(e.GlobalPosition - Player.GlobalPosition, Vector3.Up);
           float dist = Player.GlobalPosition.DistanceTo(e.GlobalPosition);
           if (Mathf.Abs(angle) < 50 && dist < usedWeapon switch {
             ItemNone => 1.5f,
@@ -232,7 +234,7 @@ public partial class Game : Node {
               _ => 1
             };
 
-            e.Hit(damage, fighting == Anim.SwordL || fighting == Anim.SwordR);
+            e.HitEnemy(damage, fighting == Anim.SwordL || fighting == Anim.SwordR);
             currentEnemy = e;
 
             // FIXME the amount of damage should be proportional to the weapon and the armor/deficiency of the enemy
@@ -445,10 +447,10 @@ public partial class Game : Node {
 
  */
 
-    if (fight) {
+    if (fight) { // FIXME we should do some delay between hits
       SetStatus(PlayerStatus.Idle, Anim.Idle);
       bool doit = false;
-      if (up) {
+      if (up && fightTime <= 0) {
         if (usedWeapon == ItemKatana) fighting = Anim.SwordL;
         else if (usedWeapon == ItemNunchaku) { fighting = Anim.SwordL; Nunchaku1.Visible = false; Nunchaku2.Visible = true; }
         else {
@@ -458,19 +460,19 @@ public partial class Game : Node {
         }
         doit = true;
       }
-      else if (left) {
+      else if (left && fightTime <= 0) {
         fighting = Anim.KickL;
         PlayerSound.Stream = Kicks[rnd.RandiRange(0, 2)];
         PlayerSound.Play();
         doit = true;
       }
-      else if (down) {
+      else if (down && fightTime <= 0) {
         fighting = Anim.KickR;
         PlayerSound.Stream = Kicks[rnd.RandiRange(0, 2)];
         PlayerSound.Play();
         doit = true;
       }
-      else if (right) {
+      else if (right && fightTime <= 0) {
         if (usedWeapon == ItemKatana) fighting = Anim.SwordR;
         else if (usedWeapon == ItemNunchaku) { fighting = Anim.SwordR; Nunchaku1.Visible = false; Nunchaku2.Visible = true; }
         else {
@@ -480,7 +482,7 @@ public partial class Game : Node {
         }
         doit = true;
       }
-      if (doit && fightTime <= 0) {
+      if (doit) {
         if (usedWeapon == ItemNunchaku) fightTime = .4;
         else fightTime = .5;
         checkHit = true;
@@ -503,9 +505,9 @@ public partial class Game : Node {
         else if (usedWeapon == ItemNunchaku) { fighting = Anim.SwordL; Nunchaku1.Visible = false; Nunchaku2.Visible = true; }
         else fighting = Anim.FistL;
       }
-      PlayerSound.Stream = Fists[rnd.RandiRange(0, 2)];
-      PlayerSound.Play();
       if (fightTime <= 0) {
+        PlayerSound.Stream = Fists[rnd.RandiRange(0, 2)];
+        PlayerSound.Play();
         SetStatus(PlayerStatus.Fight, fighting);
         fightTime = .5;
         checkHit = true;
@@ -540,6 +542,8 @@ public partial class Game : Node {
           pos.Y = resY;
           Player.Position = pos;
         }
+        PlayerSound.Stream = JumpSound;
+        PlayerSound.Play();
       }
       else if (anyDir) {
         CalculateDirection(up, down, left, right);
@@ -589,8 +593,8 @@ public partial class Game : Node {
   private float CheckEnemiesFighting(float yAngle) {
     animTree.Set("parameters/TimeScale/scale", 1);
     if (currentEnemy == null) return yAngle; // No enemies
-    if (currentEnemy.status != Enemy.Status.Fighting && currentEnemy.status != Enemy.Status.StartFighitng) return yAngle; // No fighting
-    if (Player.Position.DistanceTo(currentEnemy.Position) > 5f) return yAngle; // Far away
+    if (!currentEnemy.IsPursuing) return yAngle; // No fighting
+    if (Player.Position.DistanceTo(currentEnemy.Position) > 3f) return yAngle; // Far away
 
     // Calculate the angle that is going to the enemy
     float angle = 235 + r2d * Player.GlobalPosition.SignedAngleTo(currentEnemy.GlobalPosition - Player.GlobalPosition, Vector3.Up);
@@ -935,10 +939,14 @@ public partial class Game : Node {
   internal void RegisterEnemyHitEvent(Enemy enemy) {
     enemy.HitPlayer += Enemy_HitPlayer;
   }
-
+  internal void RemoveEnemyHitEvent(Enemy enemy) {
+    enemy.HitPlayer -= Enemy_HitPlayer;
+  }
   private void Enemy_HitPlayer(float amount) {
     HitPlayer(amount);
   }
+
+  
 }
 
 public enum Rot { None = -1, TR = 0, T = 45, TL = 90, L = 135, BL = 180, B = 225, BR = 270, R = 315 };
