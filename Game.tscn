@@ -1,4 +1,4 @@
-[gd_scene load_steps=143 format=4 uid="uid://cv7nhf4mjycpb"]
+[gd_scene load_steps=146 format=4 uid="uid://cv7nhf4mjycpb"]
 
 [ext_resource type="Script" path="res://Scripts/Game.cs" id="1_eaoqg"]
 [ext_resource type="Texture2D" uid="uid://dwxmkrixujhjc" path="res://Scenery/Grass/Grass.jpg" id="2_3ecv3"]
@@ -62,6 +62,8 @@
 [ext_resource type="AudioStream" uid="uid://b8177c7troqw" path="res://Audio/Sounds/Grunt4.ogg" id="40_un2ho"]
 [ext_resource type="PackedScene" uid="uid://bne2irl7umsr0" path="res://Scenery/Stairs/WallStair.tscn" id="51_c17us"]
 [ext_resource type="PackedScene" uid="uid://ddx6pyxdpfwhh" path="res://Items/BrassKnuckels.tscn" id="53_n5sl4"]
+[ext_resource type="Texture2D" uid="uid://b8qoy5oie3cvg" path="res://Gfx/Ninja Head/Ninja Head.png" id="55_qok7k"]
+[ext_resource type="Script" path="res://Scripts/NinjaHead.cs" id="56_gv2up"]
 
 [sub_resource type="Environment" id="Environment_mxreo"]
 ambient_light_source = 2
@@ -78,6 +80,10 @@ bg_color = Color(0.0470588, 0.0470588, 0.203922, 1)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_f35ak"]
 bg_color = Color(0.0470588, 0.0470588, 0.203922, 1)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_pj3rp"]
+atlas = ExtResource("55_qok7k")
+region = Rect2(0, 0, 512, 460)
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_jabun"]
 shader = ExtResource("27_f5yrb")
@@ -12428,8 +12434,22 @@ offset_bottom = -42.0
 grow_horizontal = 2
 grow_vertical = 0
 theme_override_font_sizes/font_size = 40
-text = "0 NONE 0.00 "
 horizontal_alignment = 2
+
+[node name="NinjaHead" type="TextureRect" parent="UI/ContainerUI"]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -360.0
+offset_top = -323.0
+grow_horizontal = 0
+grow_vertical = 0
+texture = SubResource("AtlasTexture_pj3rp")
+expand_mode = 1
+script = ExtResource("56_gv2up")
 
 [node name="Debugimage" type="TextureRect" parent="UI"]
 visible = false
@@ -12444,7 +12464,6 @@ texture = ExtResource("23_avkfk")
 stream = ExtResource("24_t3pyj")
 
 [node name="CRTLayer" type="CanvasLayer" parent="."]
-visible = false
 
 [node name="CRT" type="ColorRect" parent="CRTLayer"]
 material = SubResource("ShaderMaterial_jabun")
@@ -12928,7 +12947,7 @@ mesh = SubResource("ArrayMesh_nkead")
 skin = SubResource("Skin_q5oul")
 
 [node name="BoneAttachment3D" type="BoneAttachment3D" parent="Ninja/Armature/Skeleton3D"]
-transform = Transform3D(-0.852618, -0.254218, 0.456526, 0.408674, 0.220015, 0.885764, -0.32562, 0.941789, -0.0836967, -26.7326, -24.3905, -79.6158)
+transform = Transform3D(-0.852619, -0.254217, 0.456525, 0.408674, 0.220013, 0.885765, -0.325619, 0.94179, -0.0836954, -26.7325, -24.3906, -79.6159)
 bone_name = "mixamorig_RightHandMiddle1"
 bone_idx = 43
 
