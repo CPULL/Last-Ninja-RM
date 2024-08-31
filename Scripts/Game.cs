@@ -83,7 +83,6 @@ public partial class Game : Node {
     GetTree().CreateTimer(.25).Timeout += Startup;
   }
 
-  [Export] TextureRect DebugLogo;
   void Startup() {
     Katana.Visible = false;
     Nunchaku1.Visible = false;
@@ -95,9 +94,8 @@ public partial class Game : Node {
       Items[i].Visible = false;
     }
 
-    // FIXME Music.Play();
-    DebugLogo.Visible = false;
-    currentRoom = room.BuildRoom(World.GardenSouth, 0);
+    //Music.Play();
+    currentRoom = room.BuildRoom(World.OutsideTheGarden, 0);
     currentEnemy = null;
     LabelLocation.Text = currentRoom.RoomName;
     Health = 100;
@@ -113,6 +111,23 @@ public partial class Game : Node {
     if (k.Keycode == Key.Q && k.Pressed) { currentRoom = room.BuildRoom(World.GardenNorthPoolWall, 0); currentEnemy = null; }
     if (k.Keycode == Key.Z && k.Pressed) HitPlayer(26);
     if (k.Keycode == Key.Escape && k.Pressed) GetTree().Quit();
+
+
+
+    if (k.Keycode == Key.Key1 && k.Pressed) { currentRoom = room.BuildRoom(0, 0); currentEnemy = null; }
+    if (k.Keycode == Key.Key2 && k.Pressed) { currentRoom = room.BuildRoom(1, 0); currentEnemy = null; }
+    if (k.Keycode == Key.Key3 && k.Pressed) { currentRoom = room.BuildRoom(2, 0); currentEnemy = null; }
+    if (k.Keycode == Key.Key4 && k.Pressed) { currentRoom = room.BuildRoom(3, 0); currentEnemy = null; }
+    if (k.Keycode == Key.Key5 && k.Pressed) { currentRoom = room.BuildRoom(4, 0); currentEnemy = null; }
+    if (k.Keycode == Key.Key6 && k.Pressed) { currentRoom = room.BuildRoom(5, 0); currentEnemy = null; }
+
+    if (k.Keycode == Key.X && k.Pressed) (PowerBarEnemy.Material as ShaderMaterial).SetShaderParameter("Value", .2);
+    if (k.Keycode == Key.C && k.Pressed) (PowerBarEnemy.Material as ShaderMaterial).SetShaderParameter("Value", .8);
+
+
+    if (k.Keycode == Key.B && k.Pressed) (PowerBarNinja.Material as ShaderMaterial).SetShaderParameter("Value", .666);
+
+
   }
 
 

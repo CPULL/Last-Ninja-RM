@@ -2,12 +2,14 @@ shader_type canvas_item;
 
 uniform sampler2D SCREEN_TEXTURE : hint_screen_texture, repeat_disable, filter_nearest;
 uniform float pixelsWidth : hint_range(160, 1280) = 640;
+uniform bool HalfBrite = true;
+uniform bool CRT = true;
 
 const int numColors = 50;
 
 const vec3 c64[numColors] = {
 	// Normal colors
-	// Half brite (black is replaced by pure green
+	// Half brite (black is replaced by pure green)
 vec3(0.000, 0.000, 0.000),
 vec3(0.133, 0.133, 0.133),
 vec3(0.267, 0.267, 0.267),
@@ -63,21 +65,34 @@ vec3(0.349, 0.729, 0.322)
 void fragment() {
 	vec2 uv = SCREEN_UV;
 	float pixelsHeight = pixelsWidth * 9.0 / 16.0;
+	vec3 col;
 	uv.x = floor(pixelsWidth * uv.x) / pixelsWidth;
-	uv.y = floor(pixelsHeight * uv.y) / pixelsHeight;
-	vec3 col = texture(SCREEN_TEXTURE, uv).rgb;
+	float vpos = floor(pixelsHeight * uv.y); 
+	uv.y = vpos / pixelsHeight;
+	col = texture(SCREEN_TEXTURE, uv).rgb;	
 
 	// Find the closest C64 color, we do 4 passes
 	// 1 normal C64 colors, 1 half brite c64 colors, 2 half saturation, half sat and bright
 	int colIndex = 0; // 0..15 Normal, 16..31 halfb, 32..47 halfs, 48..63 halved
 	float dist = 100000.0;
+	vec3 res;
 	for(int i=0; i<numColors; i++) {
 		float d = distance(col, c64[i]);
 		if (d < dist) {
 			dist = d;
-			colIndex = i;
+			res = c64[i];
 		}
 	}
+	for(int i=0; HalfBrite && i<numColors; i++) {
+		vec3 half = c64[i] * 0.5;
+		float d = distance(col, half);
+		if (d < dist) {
+			dist = d;
+			res = half;
+		}
+	}
+	
+	if (CRT && int(vpos) % 4 == 0) res *= 1.2;
 
-	COLOR = vec4(c64[colIndex], 1.0);
+	COLOR = vec4(res, 1.0);
 }

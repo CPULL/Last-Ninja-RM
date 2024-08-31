@@ -1,4 +1,5 @@
 using Godot;
+using System.Linq;
 
 namespace LastNinjaRM;
 
@@ -8,10 +9,12 @@ public partial class Room : Node3D {
   Game game;
   RandomNumberGenerator rnd = new();
   [Export] PackedScene[] EnemyPrefabs;
+  ShaderMaterial PowerBarMaterial;
 
   public override void _Ready() {
     game = GetParent() as Game;
     if (game == null) GD.PrintErr("Cannot find the Game script!");
+    PowerBarMaterial = game.PowerBarEnemy.Material as ShaderMaterial;
   }
 
   Color black = Color.FromHtml("000F");
@@ -125,6 +128,12 @@ public partial class Room : Node3D {
       AddChild(enemy);
       enemy.Start(game, e);
       game.enemies.Add(enemy);
+    }
+    if (room.Enemies.Count() > 0) {
+      PowerBarMaterial?.SetShaderParameter("Value", room.Enemies[0].Health * .01);
+    }
+    else {
+      PowerBarMaterial?.SetShaderParameter("Value", 0);
     }
 
 

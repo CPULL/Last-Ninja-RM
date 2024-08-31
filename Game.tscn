@@ -1,4 +1,4 @@
-[gd_scene load_steps=146 format=4 uid="uid://cv7nhf4mjycpb"]
+[gd_scene load_steps=145 format=4 uid="uid://cv7nhf4mjycpb"]
 
 [ext_resource type="Script" path="res://Scripts/Game.cs" id="1_eaoqg"]
 [ext_resource type="Texture2D" uid="uid://dwxmkrixujhjc" path="res://Scenery/Grass/Grass.jpg" id="2_3ecv3"]
@@ -31,7 +31,6 @@
 [ext_resource type="PackedScene" uid="uid://dke0tvabpuvar" path="res://Scenery/Furniture/StandingBox.tscn" id="20_ivu8l"]
 [ext_resource type="Texture2D" uid="uid://dmsvqfgobcmv6" path="res://Gfx/Items/Katana.png" id="21_lkxn3"]
 [ext_resource type="PackedScene" uid="uid://cr6yajids4m0w" path="res://Scenery/Water/Pool.tscn" id="22_ev0g4"]
-[ext_resource type="Texture2D" uid="uid://d1nwoyeg2hpoh" path="res://Gfx/UI/Icon.png" id="23_avkfk"]
 [ext_resource type="PackedScene" uid="uid://7q5gvfx56d5g" path="res://Scenery/Rocks/RockPlatform.tscn" id="23_rghup"]
 [ext_resource type="Material" uid="uid://5vu11tr5xf0m" path="res://Gfx/PowerBar/UI Power Bar Enemy material.tres" id="24_353ku"]
 [ext_resource type="AudioStream" uid="uid://bqanpwpbahoky" path="res://Audio/Music/Intro Music.ogg" id="24_t3pyj"]
@@ -87,7 +86,9 @@ region = Rect2(0, 0, 512, 460)
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_jabun"]
 shader = ExtResource("27_f5yrb")
-shader_parameter/pixelsWidth = 1280.0
+shader_parameter/pixelsWidth = 1024.0
+shader_parameter/HalfBrite = true
+shader_parameter/CRT = true
 
 [sub_resource type="PlaneMesh" id="PlaneMesh_njnoj"]
 
@@ -12061,7 +12062,7 @@ WaterSteps = [ExtResource("27_tnipe"), ExtResource("28_hdrpj"), ExtResource("29_
 Fists = [ExtResource("31_y66jg"), ExtResource("32_a5jac"), ExtResource("33_rtpry")]
 Kicks = [ExtResource("34_vbixy"), ExtResource("35_xr2qu"), ExtResource("36_rba0c")]
 Grunts = [ExtResource("37_p0kbq"), ExtResource("38_ou8av"), ExtResource("39_lnegi"), ExtResource("40_un2ho")]
-DebugLogo = NodePath("UI/Debugimage")
+DebugLogo = NodePath("")
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource("Environment_mxreo")
@@ -12208,14 +12209,13 @@ texture = ExtResource("17_2phbk")
 stretch_mode = 2
 
 [node name="LabelLocation" type="Label" parent="UI/ContainerUI/PanelBottom"]
-visible = false
 layout_mode = 0
 offset_left = 1105.0
 offset_top = 88.0
 offset_right = 1557.0
 offset_bottom = 143.0
 theme_override_font_sizes/font_size = 40
-text = "Garden South"
+text = "Outside the Garden"
 
 [node name="PanelLeft" type="Panel" parent="UI/ContainerUI"]
 layout_mode = 1
@@ -12437,6 +12437,7 @@ theme_override_font_sizes/font_size = 40
 horizontal_alignment = 2
 
 [node name="NinjaHead" type="TextureRect" parent="UI/ContainerUI"]
+visible = false
 layout_mode = 1
 anchors_preset = 3
 anchor_left = 1.0
@@ -12450,15 +12451,6 @@ grow_vertical = 0
 texture = SubResource("AtlasTexture_pj3rp")
 expand_mode = 1
 script = ExtResource("56_gv2up")
-
-[node name="Debugimage" type="TextureRect" parent="UI"]
-visible = false
-layout_mode = 0
-offset_left = 647.0
-offset_top = 354.0
-offset_right = 903.0
-offset_bottom = 610.0
-texture = ExtResource("23_avkfk")
 
 [node name="MusicStream" type="AudioStreamPlayer" parent="."]
 stream = ExtResource("24_t3pyj")

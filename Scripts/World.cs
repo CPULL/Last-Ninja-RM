@@ -332,6 +332,7 @@ public class EnemyDef {
   public float AttackDistance;
   public float Speed;
   public float Strenght;
+  public float Health;
   public bool Defeated;
   public Vector4 DeathPos;
 
@@ -343,6 +344,7 @@ public class EnemyDef {
     Speed = sp;
     Strenght = st;
     Defeated = false;
+    Health = 100;
   }
 
   public enum EnemyType { BadNinjaPunch };

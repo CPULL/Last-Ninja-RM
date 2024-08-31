@@ -2,6 +2,8 @@ using Godot;
 using LastNinjaRM;
 using System;
 
+namespace LastNinjaRM;
+
 public partial class Enemy : Node3D {
   [Export] AnimationPlayer anim;
   [Export] Vector3 StartLocation;
@@ -52,7 +54,6 @@ public partial class Enemy : Node3D {
    Punch -> waits to complete the hit and damages player eventually; in case Hit moves to Hit (or Dead)
    Hit -> waits a short while then checks if the player is close or not and go in Run or Fight
    
-   
    */
 
 
@@ -93,15 +94,15 @@ public partial class Enemy : Node3D {
     AttackDistance = src.AttackDistance;
     Speed = src.Speed;
     Strenght = src.Strenght;
-    Health = 100;
+    Health = src.Health;
     source = src;
+    PowerBarMaterial = game.PowerBarEnemy.Material as ShaderMaterial;
     if (source.Defeated) {
       Position = new(source.DeathPos.X, source.DeathPos.Y, source.DeathPos.Z);
       RotationDegrees = new(0, source.DeathPos.W, 0);
       death = true;
       anim.Play(AnimRagdoll, -1, 200);
       Health = 0;
-      PowerBarMaterial = game.PowerBarEnemy.Material as ShaderMaterial;
       PowerBarMaterial?.SetShaderParameter("Value", 0);
     }
     game.RegisterEnemyHitEvent(this);
@@ -148,6 +149,7 @@ public partial class Enemy : Node3D {
         waitForPunch = rnd.RandfRange(.1f, .3f);
         break;
       case Status.Dead:
+        SetAnim(AnimRagdoll);
         break;
       case Status.Won:
         break;
@@ -158,9 +160,7 @@ public partial class Enemy : Node3D {
   public override void _Process(double delta) {
     Dbg.Text = $"{status} {ca}  P{waitForPunch:F1} H{checkHitDelay:F1} B{beingHitDelay:F1}";
 
-    
-
-    if (death || player == null || status == Status.Won) return;
+    if (player == null || status == Status.Won) return;
 
     // Always get angle and distance between Player and Enemy
     float dist = GlobalPosition.DistanceTo(player.GlobalPosition);
@@ -171,13 +171,17 @@ public partial class Enemy : Node3D {
 
     // Update health progress bar
     if (PowerBarMaterial != null) {
-      double val = PowerBarMaterial.GetShaderParameter("Value").AsDouble();
-      if (val > Health * .01) {
-        val -= delta * .5;
-        PowerBarMaterial.SetShaderParameter("Value", val);
+      float val = (float)(PowerBarMaterial.GetShaderParameter("Value").AsDouble() * 100f);
+      if (Mathf.Abs(val - Health) > 1) {
+        if (val < Health) {
+          PowerBarMaterial.SetShaderParameter("Value", Health * .01);
+        }
+        if (val > Health) {
+          val -= d * 50f;
+          PowerBarMaterial.SetShaderParameter("Value", val * .01);
+        }
       }
-      if (val < 0.005) {
-        PowerBarMaterial = null;
+      if (val < 1f) {
         PowerBarMaterial.SetShaderParameter("Value", 0);
       }
     }
@@ -205,9 +209,9 @@ public partial class Enemy : Node3D {
         if (beingHitDelay < 0) SetStatus(Status.Fight);
         break;
       case Status.Dead:
-        break;
+        return;
       case Status.Won:
-        break;
+        return;
     }
   }
 
@@ -344,6 +348,9 @@ public partial class Enemy : Node3D {
   public float HitEnemy(float amount, bool strong) {
     if (death) return 0;
 
+
+    amount *= 15;
+
     if (beingHitDelay > 0) {
       Health -= amount * .25f; // If already hit gets less damage
     }
@@ -358,12 +365,16 @@ public partial class Enemy : Node3D {
       source.DeathPos.Z = Position.Z;
       source.DeathPos.W = RotationDegrees.Y;
       source.Defeated = true;
+      Health = 0;
+      source.Health = 0;
+      return 0;
     }
     else if (beingHitDelay <= 0) {
       beingHitDelay = 1.15f;
     }
     SetStatus(Status.BeingHit);
 
+    source.Health = Health;
     return Health;
   }
 
