@@ -12079,6 +12079,7 @@ PortalMesh = ExtResource("14_ut01c")
 EnemyPrefabs = [ExtResource("19_ky581")]
 
 [node name="RoomDebug" type="Node3D" parent="."]
+visible = false
 
 [node name="Debug" type="Node3D" parent="RoomDebug"]
 
@@ -12209,12 +12210,13 @@ stretch_mode = 2
 
 [node name="LabelLocation" type="Label" parent="UI/ContainerUI/PanelBottom"]
 layout_mode = 0
-offset_left = 1105.0
+offset_left = 840.0
 offset_top = 88.0
 offset_right = 1557.0
 offset_bottom = 143.0
 theme_override_font_sizes/font_size = 40
 text = "Outside the Garden"
+horizontal_alignment = 2
 
 [node name="PanelLeft" type="Panel" parent="UI/ContainerUI"]
 layout_mode = 1
@@ -12426,10 +12428,10 @@ anchor_left = 0.5
 anchor_top = 1.0
 anchor_right = 0.5
 anchor_bottom = 1.0
-offset_left = -1147.0
-offset_top = -97.0
-offset_right = 115.0
-offset_bottom = -42.0
+offset_left = -1226.0
+offset_top = -149.0
+offset_right = -299.0
+offset_bottom = -94.0
 grow_horizontal = 2
 grow_vertical = 0
 theme_override_font_sizes/font_size = 40
@@ -12452,6 +12454,7 @@ script = ExtResource("56_gv2up")
 
 [node name="MusicStream" type="AudioStreamPlayer" parent="."]
 stream = ExtResource("24_t3pyj")
+volume_db = -12.0
 
 [node name="CRTLayer" type="CanvasLayer" parent="."]
 

@@ -4770,6 +4770,7 @@ collision_mask = 4
 collide_with_areas = true
 
 [node name="Label" type="Label" parent="."]
+visible = false
 offset_left = 106.0
 offset_top = 43.0
 offset_right = 246.0

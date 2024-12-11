@@ -348,9 +348,6 @@ public partial class Enemy : Node3D {
   public float HitEnemy(float amount, bool strong) {
     if (death) return 0;
 
-
-    amount *= 15;
-
     if (beingHitDelay > 0) {
       Health -= amount * .25f; // If already hit gets less damage
     }

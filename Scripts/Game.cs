@@ -80,7 +80,7 @@ public partial class Game : Node {
     a.LoopMode = Animation.LoopModeEnum.None;
 
     usedWeapon = ItemNone;
-    GetTree().CreateTimer(.25).Timeout += Startup;
+    GetTree().CreateTimer(10.25).Timeout += Startup;
   }
 
   void Startup() {
@@ -94,7 +94,7 @@ public partial class Game : Node {
       Items[i].Visible = false;
     }
 
-    //Music.Play();
+    Music.Play();
     currentRoom = room.BuildRoom(World.OutsideTheGarden, 0);
     currentEnemy = null;
     LabelLocation.Text = currentRoom.RoomName;
@@ -163,8 +163,6 @@ public partial class Game : Node {
 
   public override void _Process(double delta) {
     // FIXME    Dbg.Text = $"{anim} {status} {hitDelay:f} {sm?.GetCurrentNode()}";
-
-    Dbg.Text = $"{currentEnemy}";
 
     if (Engine.IsEditorHint() || status == PlayerStatus.NONE) return;
     float d = (float)delta;

@@ -11,6 +11,8 @@ public partial class Room : Node3D {
   [Export] PackedScene[] EnemyPrefabs;
   ShaderMaterial PowerBarMaterial;
 
+  const double buildSeconds = 2;
+
   public override void _Ready() {
     game = GetParent() as Game;
     if (game == null) GD.PrintErr("Cannot find the Game script!");
@@ -293,7 +295,7 @@ public partial class Room : Node3D {
       item.Free();
     }
 
-    intervalTime = 1 / (room.Parts.Length + 3 * room.Items.Length);
+    intervalTime = buildSeconds / (room.Parts.Length + 3 * room.Items.Length);
     this.portal = room.Portals[portal];
     partNum = -1;
     itemNum = -1;
